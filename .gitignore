@@ -1,53 +1,285 @@
-# =========================
-# Python
-# =========================
+# =========================================================
+# CyberSentinel - .gitignore
+# =========================================================
+
+
+# =========================================================
+# PYTHON
+# =========================================================
+
+# Virtual environments
 venv/
+.venv/
+env/
+ENV/
+
+# Python cache
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
-*.log
+*.py[cod]
+*$py.class
 
-# =========================
-# Environment Variables
-# =========================
+# Python packaging
+*.egg
+*.egg-info/
+dist/
+build/
+pip-wheel-metadata/
+
+# Test / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# Type checking / linting
+.mypy_cache/
+.pyre/
+.ruff_cache/
+
+
+# =========================================================
+# ENVIRONMENT VARIABLES / SECRETS
+# =========================================================
+
 .env
+.env.*
+!.env.example
 
-# =========================
-# Node / Frontend
-# =========================
+# Local configuration
+*.secret
+secrets/
+credentials/
+
+
+# =========================================================
+# LOGS / TEMPORARY FILES
+# =========================================================
+
+*.log
+*.tmp
+*.temp
+*.cache
+
+logs/
+tmp/
+temp/
+
+
+# =========================================================
+# NODE / REACT / VITE
+# =========================================================
+
 node_modules/
 frontend/node_modules/
+
+# Build outputs
 dist/
 build/
 
-# =========================
-# ML Models (ignore all)
-# =========================
-backend/models/
+# Vite
+.vite/
 
-# Allow ONLY required models
-!backend/models/
+# npm
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# React / frontend caches
+frontend/.vite/
+frontend/dist/
+frontend/build/
+
+
+# =========================================================
+# IDE / EDITOR
+# =========================================================
+
+.vscode/
+.idea/
+
+# VS Code local settings
+*.code-workspace
+
+# JetBrains
+*.iml
+
+
+# =========================================================
+# OPERATING SYSTEM
+# =========================================================
+
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Windows
+$RECYCLE.BIN/
+
+
+# =========================================================
+# DATASETS / LARGE DATA
+# =========================================================
+
+data/
+datasets/
+
+# Common dataset formats
+*.csv
+*.tsv
+*.h5
+*.hdf5
+*.parquet
+
+# Image datasets
+*.tif
+*.tiff
+*.bmp
+
+
+# =========================================================
+# GENERATED / PROCESSED DATA
+# =========================================================
+
+# Generated model outputs
+outputs/
+
+# Processed datasets / images
+processed_data/
+
+# Training outputs, checkpoints, logs, plots
+training/
+
+
+# =========================================================
+# MACHINE LEARNING MODELS
+# =========================================================
+
+# Ignore all models by default
+backend/models/*
+
+
+# ---------------------------------------------------------
+# REQUIRED URL PHISHING MODEL
+# ---------------------------------------------------------
+
 !backend/models/url_models/
 !backend/models/url_models/best_url_model.pkl
+
+
+# ---------------------------------------------------------
+# REQUIRED SMS / SMISHING MODEL
+# ---------------------------------------------------------
 
 !backend/models/sms_model/
 !backend/models/sms_model/best_sms_pipeline.pkl
 
-# =========================
-# Data / Datasets
-# =========================
-data/
-datasets/
 
-# =========================
-# OS / Misc
-# =========================
-.DS_Store
-Thumbs.db
+# ---------------------------------------------------------
+# REQUIRED VISUAL PHISHING MODEL
+# ---------------------------------------------------------
 
-# =========================
-# Optional (logs / temp)
-# =========================
-*.tmp
-*.cache
+!backend/models/visual_model/
+!backend/models/visual_model/mobilenet_exp_wd_5e-05_best.pth
+
+
+# Ignore other visual model checkpoints
+backend/models/visual_model/*.pth
+!backend/models/visual_model/mobilenet_exp_wd_5e-05_best.pth
+
+
+# =========================================================
+# JUPYTER NOTEBOOK
+# =========================================================
+
+.ipynb_checkpoints/
+
+
+# =========================================================
+# PYTORCH / MACHINE LEARNING GENERATED FILES
+# =========================================================
+
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.joblib
+
+# Re-allow the required deployed model
+!backend/models/visual_model/mobilenet_exp_wd_5e-05_best.pth
+!backend/models/url_models/best_url_model.pkl
+!backend/models/sms_model/best_sms_pipeline.pkl
+
+
+# =========================================================
+# TEST / DEVELOPMENT ARTIFACTS
+# =========================================================
+
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local test outputs
+test_output/
+test_outputs/
+
+
+# =========================================================
+# GENERATED REPORTS / VISUALIZATIONS
+# =========================================================
+
+*.png
+*.jpg
+*.jpeg
+
+# Re-allow important source/reference images if needed later
+# !backend/app/assets/
+
+
+# =========================================================
+# BROWSER EXTENSION / BUILD ARTIFACTS
+# =========================================================
+
+# Extension build outputs
+extension/dist/
+extension/build/
+
+
+# =========================================================
+# DATABASE / LOCAL STORAGE
+# =========================================================
+
+# MongoDB local database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Local MongoDB data
+mongodb-data/
+mongo-data/
+
+
+# =========================================================
+# FRONTEND LOCAL FILES
+# =========================================================
+
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+# Backend local files
+backend/.env
+backend/.env.*
+!backend/.env.example
+
+
+# =========================================================
+# OS / EDITOR BACKUPS
+# =========================================================
+
+*.bak
+*.swp
+*.swo
+*~

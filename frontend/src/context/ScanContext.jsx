@@ -62,13 +62,21 @@ export function ScanProvider({ children }) {
     }, [])
 
     const addScanRecord = useCallback((type, input, result, duration) => {
+        const isVisual = type === 'visual'
+        const label = isVisual ? (result?.prediction || 'unknown') : (result?.label || 'unknown')
+        const confidence = isVisual ? ((result?.confidence || 0) / 100) : (result?.confidence || 0)
+        const risk = isVisual
+            ? (result?.risk_score || 0)
+            : result?.label === 'phishing'
+                ? (result.confidence || 0.5) * 100
+                : (1 - (result.confidence || 0.5)) * 100
         const record = {
             id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
             type,
             input,
-            label: result?.label || 'unknown',
-            confidence: result?.confidence || 0,
-            risk: result?.label === 'phishing' ? (result.confidence || 0.5) * 100 : (1 - (result.confidence || 0.5)) * 100,
+            label,
+            confidence,
+            risk,
             timestamp: new Date().toISOString(),
             duration: Math.round(duration),
             explanation: result?.explanation || [],

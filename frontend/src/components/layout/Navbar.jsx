@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../utils/AuthContext'
 import {
-    Shield, Home, Search, MessageSquare, QrCode,
+    Shield, Home, Search, MessageSquare, QrCode, Camera,
     Clock, User, LogOut, Menu, X, ChevronDown
 } from 'lucide-react'
 
@@ -11,6 +11,7 @@ const navItems = [
     { label: 'URL Scanner', path: '/url-scanner', icon: Search },
     { label: 'SMS Scanner', path: '/sms-scanner', icon: MessageSquare },
     { label: 'QR Scanner', path: '/qr-scanner', icon: QrCode },
+    { label: 'Visual Scanner', path: '/visual-scanner', icon: Camera },
     { label: 'Scan History', path: '/history', icon: Clock },
     { label: 'Profile', path: '/profile', icon: User },
 ]

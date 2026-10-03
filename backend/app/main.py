@@ -10,10 +10,16 @@ from app.services.threat_intel import ThreatIntelModule
 from app.services.inference_module import inference_module
 from app.services.db_service import db_service
 from app.services.auth_service import get_current_user
+from app.services.visual_pipeline import VisualPipeline, ImageValidationError, PipelineError
+from app.services.gradcam_service import VisualExplainer
+from app.services.ocr_service import OCRService
+from app.services.brand_detector import BrandDetector
+from app.services.visual_risk_analyzer import visual_risk_analyzer
 from app.routes.auth import router as auth_router
 from fastapi.middleware.cors import CORSMiddleware
 from concurrent.futures import ThreadPoolExecutor
 import base64
+import os
 import uvicorn
 
 app = FastAPI(title="AI Cybersecurity System API")
@@ -33,6 +39,27 @@ app.include_router(auth_router)
 qr_analyzer = QRAnalyzer()
 sms_detector = SMIShingDetector()
 threat_intel = ThreatIntelModule()
+
+# Visual pipeline singleton (lazy-loaded on first use)
+_pipeline = None
+MODELS_DIR = os.path.join(os.path.dirname(__file__), '../models/visual_model')
+VISUAL_MODEL_PATH = os.path.join(MODELS_DIR, 'mobilenet_exp_wd_5e-05_best.pth')
+
+def get_visual_pipeline():
+    global _pipeline
+    if _pipeline is None:
+        _pipeline = VisualPipeline(VISUAL_MODEL_PATH)
+    return _pipeline
+
+# Legacy lazy-loaders — delegate to pipeline for singleton consistency
+def get_visual_explainer():
+    return get_visual_pipeline()._get_explainer()
+
+def get_ocr_service():
+    return get_visual_pipeline()._get_ocr()
+
+def get_brand_detector():
+    return get_visual_pipeline()._get_brand()
 
 
 class URLRequest(BaseModel):
@@ -120,6 +147,73 @@ async def extension_analyze_sms(request: ExtensionURLRequest):
         db_service.log_prediction("sms", request.url, {}, result.get("prediction", "unknown"),
                                   result.get("confidence_score", 0), user_id="anonymous")
         return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/extension/visual-scan")
+async def extension_visual_scan(file: UploadFile = File(...)):
+    try:
+        contents = await file.read()
+        pipeline = get_visual_pipeline()
+        pipeline.validate_image(contents)
+
+        import tempfile as _tempfile
+        suffix = os.path.splitext(file.filename or "upload.png")[1] or ".png"
+        with _tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
+            tmp.write(contents)
+            temp_path = tmp.name
+
+        try:
+            pipe_result = pipeline.run(temp_path)
+        finally:
+            try:
+                os.unlink(temp_path)
+            except Exception:
+                pass
+
+        cnn = pipe_result["cnn"]
+        ocr = pipe_result["ocr"]
+        brand = pipe_result["brand_detection"]
+        vr = pipe_result["visual_risk"]
+        expl = pipe_result["explanation"]
+
+        risk_score_val = vr["score"]
+        risk_level_val = pipe_result["risk_level"]
+
+        risk = visual_risk_analyzer.analyze(
+            cnn_label="phishing" if cnn["prediction"] == "Phishing" else "legitimate",
+            cnn_confidence=cnn.get("phishing_probability", cnn["confidence"] / 100),
+            cnn_phishing_prob=cnn.get("phishing_probability", cnn["confidence"] / 100),
+            ocr_risk=ocr["risk_score"],
+            ocr_keywords=ocr["keywords"],
+            ocr_keyword_count=ocr["keyword_count"],
+            brand_brands=brand["brands"],
+            brand_confidence=brand["confidence"],
+            brand_count=brand["brand_count"],
+            brand_risk=brand["risk_score"],
+        )
+
+        return {
+            "label": risk["decision"],
+            "confidence": cnn.get("phishing_probability", cnn["confidence"] / 100),
+            "phishing_probability": cnn.get("phishing_probability", cnn["confidence"] / 100),
+            "risk_score": risk_score_val,
+            "risk_level": risk_level_val,
+            "ocr": ocr,
+            "brand_detection": brand,
+            "risk_analysis": {
+                "score": risk["score"],
+                "decision": risk["decision"],
+                "risk_level": risk["risk_level"],
+                "cnn_contribution": risk["cnn_contribution"],
+                "ocr_contribution": risk["ocr_contribution"],
+                "brand_contribution": risk["brand_contribution"],
+                "explanation": expl,
+            },
+        }
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -238,6 +332,27 @@ async def predict(request: PredictionRequest, user: dict = Depends(get_current_u
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# ─── Visual Scan endpoint (comprehensive pipeline) ───
+
+
+@app.post("/api/visual_scan")
+async def visual_scan(file: UploadFile = File(...), user: dict = Depends(get_current_user)):
+    try:
+        contents = await file.read()
+        pipeline = get_visual_pipeline()
+        result = pipeline.run_from_bytes(contents, file.filename or "upload.png")
+
+        return result
+    except ImageValidationError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except PipelineError as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Unexpected error: {e}")
 
 
 if __name__ == "__main__":

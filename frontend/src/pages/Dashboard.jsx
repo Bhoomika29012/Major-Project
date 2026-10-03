@@ -6,7 +6,7 @@ import AttackStats from '../components/AttackStats'
 import ThreatFeed from '../components/ThreatFeed'
 import QuickActionCard from '../components/ui/QuickActionCard'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
-import { Search, MessageSquare, QrCode, Activity } from 'lucide-react'
+import { Search, MessageSquare, QrCode, Camera, Activity } from 'lucide-react'
 
 const Dashboard = () => {
     const { user } = useAuth()
@@ -54,7 +54,7 @@ const Dashboard = () => {
                     <span className="h-1.5 w-1.5 rounded-full bg-primary-400" />
                     Quick Actions
                 </h2>
-                <div className="grid md:grid-cols-3 gap-4">
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <QuickActionCard
                         title="URL Scanner"
                         description="Analyze URLs for phishing, malware, and suspicious patterns"
@@ -78,6 +78,14 @@ const Dashboard = () => {
                         to="/qr-scanner"
                         gradient="from-emerald-500 to-emerald-600"
                         delay={160}
+                    />
+                    <QuickActionCard
+                        title="Visual Scanner"
+                        description="Analyze screenshots using AI vision, OCR & brand detection"
+                        icon={Camera}
+                        to="/visual-scanner"
+                        gradient="from-cyan-500 to-cyan-600"
+                        delay={240}
                     />
                 </div>
             </div>

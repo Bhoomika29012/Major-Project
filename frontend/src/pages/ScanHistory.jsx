@@ -1,11 +1,11 @@
 import { useState, useMemo } from 'react'
 import { useScan } from '../context/ScanContext'
-import { Clock, Search, Trash2, Shield, AlertTriangle, ShieldCheck, ArrowUpDown, ChevronRight, ChevronDown, MessageSquare, QrCode } from 'lucide-react'
+import { Clock, Search, Trash2, Shield, AlertTriangle, ShieldCheck, ArrowUpDown, ChevronRight, ChevronDown, MessageSquare, QrCode, Camera } from 'lucide-react'
 import RiskMeter from '../components/RiskMeter'
 import { calculateRisk } from '../utils/risk'
 import { generateExplanations } from '../utils/explain'
 
-const typeFilters = ['all', 'url', 'sms', 'qr']
+const typeFilters = ['all', 'url', 'sms', 'qr', 'visual']
 const riskFilters = ['all', 'safe', 'suspicious', 'phishing']
 
 const ScanHistory = () => {
@@ -52,6 +52,7 @@ const ScanHistory = () => {
             case 'url': return <Search size={14} />
             case 'sms': return <MessageSquare size={14} />
             case 'qr': return <QrCode size={14} />
+            case 'visual': return <Camera size={14} />
             default: return <Clock size={14} />
         }
     }
@@ -174,7 +175,7 @@ const ScanHistory = () => {
                                     onClick={() => setExpandedId(isExpanded ? null : item.id)}
                                 >
                                     <div className={`h-8 w-8 rounded-lg bg-slate-800/50 border border-slate-700/30 flex items-center justify-center shrink-0 ${
-                                        item.type === 'url' ? 'text-primary-400' : item.type === 'sms' ? 'text-violet-400' : 'text-emerald-400'
+                                        item.type === 'url' ? 'text-primary-400' : item.type === 'sms' ? 'text-violet-400' : item.type === 'qr' ? 'text-emerald-400' : 'text-cyan-400'
                                     }`}>
                                         {getTypeIcon(item.type)}
                                     </div>

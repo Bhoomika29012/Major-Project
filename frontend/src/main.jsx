@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard'
 import URLScannerPage from './pages/URLScannerPage'
 import SMSAnalyzerPage from './pages/SMSAnalyzerPage'
 import QRScannerPage from './pages/QRScannerPage'
+import VisualScannerPage from './pages/VisualScannerPage'
 import ScanHistory from './pages/ScanHistory'
 import Profile from './pages/Profile'
 import LoginPage from './pages/LoginPage'
@@ -28,6 +29,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                         <Route path="/url-scanner" element={<URLScannerPage />} />
                         <Route path="/sms-scanner" element={<SMSAnalyzerPage />} />
                         <Route path="/qr-scanner" element={<QRScannerPage />} />
+                        <Route path="/visual-scanner" element={<VisualScannerPage />} />
                         <Route path="/history" element={<ScanHistory />} />
                         <Route path="/profile" element={<Profile />} />
                     </Route>
